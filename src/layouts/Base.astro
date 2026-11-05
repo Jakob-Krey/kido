@@ -1,5 +1,7 @@
 ---
 interface Props { title: string; description?: string }
+// Vorschau (GitHub Pages) nicht indexieren; fuer den echten Start PUBLIC_ALLOW_INDEXING=true setzen
+const noindex = import.meta.env.PUBLIC_ALLOW_INDEXING !== 'true';
 const { title, description = 'Kurse, Spielgruppen und Ferienprogramme in Mülheim an der Ruhr – passend zum Alter deines Kindes.' } = Astro.props;
 ---
 <!doctype html>
@@ -8,6 +10,7 @@ const { title, description = 'Kurse, Spielgruppen und Ferienprogramme in Mülhei
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/favicon.svg`} />
     <title>{title}</title>
   </head>
