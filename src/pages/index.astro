@@ -1,0 +1,163 @@
+---
+import Base from '../layouts/Base.astro';
+
+const searchUrl = import.meta.env.PUBLIC_SUPABASE_URL
+  ? `${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/${import.meta.env.PUBLIC_SEARCH_FUNCTION ?? 'search-offers'}`
+  : '';
+const anonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const ages = Array.from({ length: 13 }, (_, i) => i);
+---
+<Base title="Kido – Angebote für Kinder in Mülheim an der Ruhr">
+  <header class="hero">
+    <div class="wrap">
+      <p class="logo">Kido</p>
+      <h1>Was können wir heute mit unserem Kind unternehmen?</h1>
+      <p class="lead">Gib Alter und Ort ein – wir zeigen dir passende Kurse, Spielgruppen und Ferienprogramme aus geprüften lokalen Quellen.</p>
+
+      <form id="search" class="search" data-url={searchUrl} data-key={anonKey}>
+        <label>Alter des Kindes
+          <select name="alter" required>
+            <option value="" disabled selected>Bitte wählen</option>
+            {ages.map((a) => <option value={a}>{a === 0 ? 'unter 1 Jahr' : a === 1 ? '1 Jahr' : `${a} Jahre`}</option>)}
+          </select>
+        </label>
+        <label>Ort
+          <select name="ort" required>
+            <option>Mülheim an der Ruhr</option>
+          </select>
+        </label>
+        <button type="submit">Angebote finden</button>
+      </form>
+      <p class="hint">Für Kinder von 0 bis 12 Jahren. Wir speichern nur Alter und Ort.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="results" aria-live="polite" hidden>
+      <h2>Deine Empfehlungen</h2>
+      <p id="summary" class="summary"></p>
+      <ul id="list" class="list"></ul>
+      <p class="disclaimer">Angaben ohne Gewähr. Bitte prüfe Termine und Preise beim Anbieter.</p>
+    </section>
+
+    <section class="trust">
+      <h2>Geprüfte Quellen, keine Erfindungen</h2>
+      <ul>
+        <li><strong>Nur manuell geprüfte Quellen:</strong> Wir prüfen Webseite (robots.txt, Nutzungsbedingungen) und Anbieter (Verein, Stadt, bekannter Träger).</li>
+        <li><strong>Immer mit Beleg:</strong> Jedes Angebot zeigt Quelle, Link zum Original und das Datum der letzten Aktualisierung.</li>
+        <li><strong>Keine KI-Halluzinationen:</strong> Die Zusammenfassung nutzt ausschließlich Angebote aus unserer Datenbank.</li>
+        <li><strong>Abgelaufenes verschwindet:</strong> Vergangene Termine werden automatisch ausgeblendet.</li>
+      </ul>
+    </section>
+
+    <section class="how">
+      <h2>So funktioniert's</h2>
+      <ol>
+        <li>Alter und Ort angeben</li>
+        <li>Wir filtern passende Angebote aus der Datenbank</li>
+        <li>Du bekommst eine kurze, persönliche Zusammenfassung mit Links</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Kido ist ein Projekt im Aufbau (MVP) – ohne Werbung, ohne Anmeldung.</p>
+  </footer>
+</Base>
+
+<style>
+  .hero { background: linear-gradient(180deg, #ffe7cf, var(--bg)); padding: 32px 0 40px; }
+  @media (prefers-color-scheme: dark) { .hero { background: linear-gradient(180deg, #3a2514, var(--bg)); } }
+  .logo { font-weight: 800; font-size: 1.4rem; color: var(--accent-dark); margin: 0 0 24px; }
+  h1 { font-size: clamp(1.7rem, 5vw, 2.4rem); margin: 0 0 12px; }
+  .lead { color: var(--muted); margin: 0 0 24px; }
+  .search { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; background: var(--card);
+    padding: 16px; border-radius: var(--radius); border: 1px solid var(--line); }
+  .search label { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); }
+  select { font: inherit; padding: 10px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--ink); }
+  button { grid-column: 1 / -1; font: inherit; font-weight: 700; padding: 12px; border: 0; border-radius: 10px;
+    background: var(--accent); color: #fff; cursor: pointer; }
+  button:hover { background: var(--accent-dark); }
+  button:disabled { opacity: .6; cursor: wait; }
+  .hint { color: var(--muted); font-size: .85rem; margin: 8px 0 0; }
+  @media (max-width: 520px) { .search { grid-template-columns: 1fr; } }
+  main section { margin: 32px 0; }
+  .list { list-style: none; padding: 0; display: grid; gap: 12px; }
+  .summary { background: var(--card); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 8px; }
+  .disclaimer, .foot { color: var(--muted); font-size: .85rem; }
+  .trust, .how { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 20px 12px; }
+  .foot { padding-bottom: 32px; }
+</style>
+
+<style is:global>
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .card h3 { margin: 0 0 4px; font-size: 1.05rem; }
+  .card .meta { color: var(--muted); font-size: .85rem; margin: 0 0 8px; }
+  .card .tag { display: inline-block; background: #ffe7cf; color: #8a4510; border-radius: 99px; padding: 0 10px; font-size: .75rem; margin-right: 6px; }
+  .card .src { font-size: .8rem; color: var(--muted); margin: 8px 0 0; }
+</style>
+
+<script>
+  // Demo-Daten, solange keine Edge Function konfiguriert ist (nur Platzhalter, keine echten Angebote!)
+  const demo = [
+    { titel: 'Beispiel: Babyschwimmen', kategorie: 'schwimmen', alter_von: 0, alter_bis: 2, anbieter: 'Beispiel-Anbieter', stadtteil: 'Innenstadt', kosten: '—', quelle_name: 'Demo', link_original: '#', zuletzt_aktualisiert: new Date().toISOString() },
+    { titel: 'Beispiel: Kinderturnen', kategorie: 'sport', alter_von: 3, alter_bis: 6, anbieter: 'Beispiel-Verein e. V.', stadtteil: 'Saarn', kosten: '—', quelle_name: 'Demo', link_original: '#', zuletzt_aktualisiert: new Date().toISOString() },
+    { titel: 'Beispiel: Ferien-Werkstatt', kategorie: 'ferien', alter_von: 6, alter_bis: 12, anbieter: 'Beispiel-Träger', stadtteil: 'Styrum', kosten: '—', quelle_name: 'Demo', link_original: '#', zuletzt_aktualisiert: new Date().toISOString() },
+  ];
+
+  type Offer = typeof demo[number];
+
+  const form = document.getElementById('search') as HTMLFormElement;
+  const results = document.getElementById('results') as HTMLElement;
+  const list = document.getElementById('list') as HTMLUListElement;
+  const summary = document.getElementById('summary') as HTMLElement;
+
+  function esc(s: unknown) {
+    const d = document.createElement('div');
+    d.textContent = String(s ?? '');
+    return d.innerHTML;
+  }
+
+  function render(offers: Offer[], text: string) {
+    summary.textContent = text;
+    list.innerHTML = offers.map((o) => `
+      <li class="card">
+        <h3>${esc(o.titel)}</h3>
+        <p class="meta"><span class="tag">${esc(o.kategorie)}</span>${o.alter_von}–${o.alter_bis} Jahre · ${esc(o.anbieter)}${o.stadtteil ? ' · ' + esc(o.stadtteil) : ''}</p>
+        <p class="src">Quelle: ${esc(o.quelle_name)} · Stand: ${new Date(o.zuletzt_aktualisiert).toLocaleDateString('de-DE')}
+          ${o.link_original && o.link_original !== '#' ? ` · <a href="${encodeURI(o.link_original)}" rel="noopener" target="_blank">Zum Original</a>` : ''}</p>
+      </li>`).join('') || '<li>Keine passenden Angebote gefunden.</li>';
+    results.hidden = false;
+    results.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const alter = Number(data.get('alter'));
+    const ort = String(data.get('ort'));
+    const btn = form.querySelector('button')!;
+    btn.disabled = true;
+    try {
+      const url = form.dataset.url;
+      if (!url) {
+        const hits = demo.filter((o) => alter >= o.alter_von && alter <= o.alter_bis);
+        render(hits, 'Demo-Modus: Das Backend ist noch nicht angebunden, dies sind nur Platzhalter.');
+        return;
+      }
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${form.dataset.key}` },
+        body: JSON.stringify({ alter, ort }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const json = await res.json();
+      render(json.offers ?? [], json.summary ?? '');
+    } catch {
+      render([], 'Das hat leider nicht geklappt. Bitte versuche es später noch einmal.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
