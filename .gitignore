@@ -1,0 +1,13 @@
+# Secrets – niemals committen
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Supabase lokal
+supabase/.temp/
+
+# macOS
+.DS_Store
